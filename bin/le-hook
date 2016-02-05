@@ -17,7 +17,7 @@ RES="/srv/letsencrypt.torproject.org/var/result"
 MASTER="nevii.torproject.org"
 REBUILDZONES="sudo -u dnsadm -H /srv/dns.torproject.org/bin/update"
 WAIT_TIMEOUT=600
-NSSEARCHDIGOPT=4
+NSSEARCHDIGOPT="-4"
 
 getzone() {
   name="$1"; shift
