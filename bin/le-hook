@@ -17,6 +17,7 @@ RES="/srv/letsencrypt.torproject.org/var/result"
 MASTER="nevii.torproject.org"
 REBUILDZONES="sudo -u dnsadm -H /srv/dns.torproject.org/bin/update"
 WAIT_TIMEOUT=600
+NSSEARCHDIGOPT=4
 
 getzone() {
   name="$1"; shift
@@ -62,17 +63,17 @@ post() {
         ;;
       2) # wait for all secondaries to get a new serial
         echo "Waiting for secondaries to update to match master at $serial.."
-        if dig "$zone" +nssearch | awk -vs="$serial" '$4 != s {exit 1}'; then
+        if dig "$zone" +nssearch $NSSEARCHDIGOPT | awk -vs="$serial" '$4 != s {exit 1}'; then
           break
         elif [ $(( count - last_dig_output )) -ge 10 ]; then
-          dig "$zone" +nssearch | sed -e 's/^/ /'
+          dig "$zone" +nssearch $NSSEARCHDIGOPT | sed -e 's/^/ /'
           last_dig_output="$count"
         fi
     esac
     if [ "$count" -gt "$WAIT_TIMEOUT" ]; then
       echo >&2 "Timing out in stage $stage"
       echo >&2 "Serial is $serial.  Servers are at:"
-      dig "$ZONE" +nssearch >&2
+      dig "$ZONE" +nssearch $NSSEARCHDIGOPT >&2
       echo >&2 "Giving it a try anyway.  Maybe it will work.."
     fi
     if   [ "$count" -gt 30 ] ; then sleep_time=5;
