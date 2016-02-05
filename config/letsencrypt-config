@@ -1,0 +1,19 @@
+# sh
+
+CA="https://acme-v01.api.letsencrypt.org/directory"
+#CA="https://acme-staging.api.letsencrypt.org/directory"
+LICENSE="https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf"
+
+RENEW_DAYS="30"
+KEYSIZE="4096"
+PRIVATE_KEY_RENEW="no"
+OPENSSL_CNF="/usr/lib/ssl/openssl.cnf"
+
+CHALLENGETYPE="dns-01"
+HOOK="/srv/letsencrypt.torproject.org/bin/le-hook"
+
+CONTACT_EMAIL="torproject-admin@torproject.org"
+WELLKNOWN="/srv/letsencrypt.torproject.org/var/acme-challenges"
+LOCKFILE="/srv/letsencrypt.torproject.org/var/lock"
+PRIVATE_KEY="/srv/letsencrypt.torproject.org/var/private_key.pem"
+

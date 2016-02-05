@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# The hook script (indicated in the config.sh file or the --hook/-k command
+# line argument) gets four arguments: an operation name (clean_challenge,
+# deploy_challenge, or deploy_cert) and some operands for that. For
+# deploy_challenge $2 is the domain name for which the certificate is required,
+# $3 is a "challenge token" (which is not needed for dns-01), and $4 is a token
+# which needs to be inserted in a TXT record for the domain.
+
+set -e
+set -u
+
+umask 022
+BASE="/srv/letsencrypt.torproject.org"
+RES="/srv/letsencrypt.torproject.org/var/result"
+
+deploy_cert() {
+  name="$1"; shift
+
+  b="$BASE/var/certs/$name"
+  key="$b/privkey.pem"
+  cert="$b/cert.pem"
+  chain="$b/chain.pem"
+  chained="$b/fullchain.pem"
+
+  mkdir -p "$RES"
+  install -m 0600 "$key" "$RES/$name.key"
+  install -m 0644 "$cert" "$RES/$name.crt"
+  install -m 0644 "$chain" "$RES/$name.crt-chain"
+  install -m 0644 "$chained" "$RES/$name.crt-chained"
+
+  size=$(openssl rsa  < "$key" -text -noout | awk -F: '$1 == "Private-Key" {print $2}' | sed -e 's/[^0-9]//g')
+  e="$BASE/var/extra/dh-$size.pem"
+  if [ -e "$e" ]; then
+    cat "$e" >> "$RES/$name.crt-chained"
+  else
+    echo >&2 "Warning: No $e file found."
+  fi
+}
+
+
+if [ "$#" = 0 ]; then
+  echo >&2 "Usage: $0 <name>"
+fi
+
+deploy_cert "$1"
+push

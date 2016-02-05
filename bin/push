@@ -1,0 +1,3 @@
+#!/bin/sh
+
+rsync -Pravz --delete /srv/letsencrypt.torproject.org/var/result/ puppet@pauli:-overridden-

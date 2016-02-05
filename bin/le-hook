@@ -1,0 +1,120 @@
+#!/bin/sh
+
+# The hook script (indicated in the config.sh file or the --hook/-k command
+# line argument) gets four arguments: an operation name (clean_challenge,
+# deploy_challenge, or deploy_cert) and some operands for that. For
+# deploy_challenge $2 is the domain name for which the certificate is required,
+# $3 is a "challenge token" (which is not needed for dns-01), and $4 is a token
+# which needs to be inserted in a TXT record for the domain.
+
+set -e
+set -u
+
+umask 022
+
+BASE="/srv/letsencrypt.torproject.org/var/hook"
+RES="/srv/letsencrypt.torproject.org/var/result"
+MASTER="nevii.torproject.org"
+REBUILDZONES="sudo -u dnsadm -H /srv/dns.torproject.org/bin/update"
+WAIT_TIMEOUT=600
+
+getzone() {
+  name="$1"; shift
+
+  # find zone cut
+  while [ "$(dig -t SOA "$name" +noall +answer | awk '$4=="SOA" {print}')" = "" ] && [ "$name" != "" ] ; do
+    name=${name#*.}
+  done
+  echo "$name"
+}
+
+getserial() {
+  name="$1"; shift
+  if [ "$#" -gt 0 ]; then
+    from="@$1"
+  else
+    from=""
+  fi
+  dig -t SOA "$name" $from +short | awk '{print $3}'
+}
+
+post() {
+  name="$1"; shift
+  zone="$(getzone "$name")"
+  pre="$(getserial "$zone" "$MASTER")"
+
+  cat "$BASE/challenges/"* > "$BASE/snippet"
+  (cd / && $REBUILDZONES)
+
+  count=1
+  stage=1
+  sleep_time=1
+  last_dig_output=0
+  while : ; do
+    serial="$(getserial "$zone" "$MASTER")"
+    case $stage in
+      1) # wait for master to get a new serial
+        echo "Waiting for master to update from $pre.  Currently at $serial.."
+        if [ "$serial" != "$pre" ]; then
+          stage=2
+          continue
+        fi
+        ;;
+      2) # wait for all secondaries to get a new serial
+        echo "Waiting for secondaries to update to match master at $serial.."
+        if dig "$zone" +nssearch | awk -vs="$serial" '$4 != s {exit 1}'; then
+          break
+        elif [ $(( count - last_dig_output )) -ge 10 ]; then
+          dig "$zone" +nssearch | sed -e 's/^/ /'
+          last_dig_output="$count"
+        fi
+    esac
+    if [ "$count" -gt "$WAIT_TIMEOUT" ]; then
+      echo >&2 "Timing out in stage $stage"
+      echo >&2 "Serial is $serial.  Servers are at:"
+      dig "$ZONE" +nssearch >&2
+      echo >&2 "Giving it a try anyway.  Maybe it will work.."
+    fi
+    if   [ "$count" -gt 30 ] ; then sleep_time=5;
+    elif [ "$count" -gt 15 ] ; then sleep_time=3;
+    elif [ "$count" -gt  5 ] ; then sleep_time=2; fi
+    count=$(( count + sleep_time ))
+    sleep $sleep_time;
+  done
+}
+deploy_challenge() {
+  name="$1"; shift
+  chtoken="$1"; shift
+  token="$1"; shift
+
+  mkdir -p "$BASE/challenges"
+  echo "_acme-challenge.$name. 60 IN TXT \"$token\"" > "$BASE/challenges/$name"
+  post "_acme-challenge.$name"
+}
+clean_challenge() {
+  name="$1"; shift
+  rm -f "$BASE/challenges/$name"
+}
+deploy_cert() {
+  name="$1"; shift
+  deploy "$name"
+}
+
+
+op="$1"; shift
+
+case "$op" in
+  clean_challenge)
+    clean_challenge "$@"
+    ;;
+  deploy_challenge)
+    deploy_challenge "$@"
+    ;;
+  deploy_cert)
+    deploy_cert "$@"
+    ;;
+  *)
+    echo >&2 "Uknown op: $op"
+    exit 1
+    ;;
+esac

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/srv/letsencrypt.torproject.org/bin/update

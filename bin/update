@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+set -u
+
+umask 022
+
+BASE=/srv/letsencrypt.torproject.org
+PATH=$BASE/bin:$PATH
+
+(cd "$BASE"/repositories/letsencrypt-domains && git pull --quiet)
+letsencrypt --cron
