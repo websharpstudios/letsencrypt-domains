@@ -114,8 +114,10 @@ case "$op" in
   deploy_cert)
     deploy_cert "$@"
     ;;
+  unchanged_cert)
+    ;;
   *)
-    echo >&2 "Uknown op: $op"
+    echo >&2 "Unknown op: $op"
     exit 1
     ;;
 esac
