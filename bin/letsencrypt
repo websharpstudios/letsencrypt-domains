@@ -1,4 +1,4 @@
 #!/bin/sh
 
 BASE=/srv/letsencrypt.torproject.org
-"$BASE/repositories/letsencrypt.sh/letsencrypt.sh" --config "$BASE/etc/letsencrypt-config" "$@"
+letsencrypt.sh --config "$BASE/etc/letsencrypt-config" "$@"
