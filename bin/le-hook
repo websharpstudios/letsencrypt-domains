@@ -73,7 +73,7 @@ post() {
     if [ "$count" -gt "$WAIT_TIMEOUT" ]; then
       echo >&2 "Timing out in stage $stage"
       echo >&2 "Serial is $serial.  Servers are at:"
-      dig "$ZONE" +nssearch $NSSEARCHDIGOPT >&2
+      dig "$zone" +nssearch $NSSEARCHDIGOPT >&2
       echo >&2 "Giving it a try anyway.  Maybe it will work.."
     fi
     if   [ "$count" -gt 30 ] ; then sleep_time=5;
