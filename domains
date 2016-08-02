@@ -5,6 +5,8 @@ torproject.org
 bridges.torproject.org
 collector.torproject.org
 compass.torproject.org
+git.torproject.org
+gitweb.torproject.org
 onion.torproject.org
 onionoo.torproject.org
 trac.torproject.org
