@@ -2,11 +2,16 @@
 # <name> [san [san ..]]
 
 torproject.org
+
+atlas.torproject.org
 aus1.torproject.org
 aus2.torproject.org
 bridges.torproject.org
+cloud.torproject.org
 collector.torproject.org
 compass.torproject.org
+consensus-health.torproject.org
+deb.torproject.org
 git.torproject.org
 gitweb.torproject.org
 jenkins.torproject.org
@@ -14,4 +19,5 @@ onion.torproject.org
 onionoo.torproject.org
 people.torproject.org
 trac.torproject.org
+
 www.onion-router.net
