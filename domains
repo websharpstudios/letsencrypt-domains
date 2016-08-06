@@ -12,12 +12,23 @@ collector.torproject.org
 compass.torproject.org
 consensus-health.torproject.org
 deb.torproject.org
+extra.torproject.org
+gettor.torproject.org
 git.torproject.org
 gitweb.torproject.org
+help.torproject.org
 jenkins.torproject.org
+nyx.torproject.org
 onion.torproject.org
 onionoo.torproject.org
+ooni.torproject.org
 people.torproject.org
+research.torproject.org
+stem.torproject.org
+tb-manual.torproject.org
+torrouter.torproject.org
 trac.torproject.org
+webstats.torproject.org
+www-staging.torproject.org
 
 www.onion-router.net
