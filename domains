@@ -18,6 +18,8 @@ git.torproject.org
 gitweb.torproject.org
 help.torproject.org
 jenkins.torproject.org
+munin.torproject.org
+nagios.torproject.org
 nyx.torproject.org
 onion.torproject.org
 onionoo.torproject.org
