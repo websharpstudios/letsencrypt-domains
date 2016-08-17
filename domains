@@ -12,12 +12,14 @@ collector.torproject.org
 compass.torproject.org
 consensus-health.torproject.org
 deb.torproject.org
+exonerator.torproject.org
 extra.torproject.org
 gettor.torproject.org
 git.torproject.org
 gitweb.torproject.org
 help.torproject.org
 jenkins.torproject.org
+metrics.torproject.org
 munin.torproject.org
 nagios.torproject.org
 nyx.torproject.org
