@@ -36,5 +36,11 @@ torrouter.torproject.org
 trac.torproject.org
 webstats.torproject.org
 www-staging.torproject.org
+donate.torproject.org
+staging.donate.torproject.org
+test.donate.torproject.org
+crm.torproject.org
+staging.crm.torproject.org
+test.crm.torproject.org
 
 www.onion-router.net
