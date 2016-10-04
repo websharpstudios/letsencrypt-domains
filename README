@@ -1,0 +1,14 @@
+= Contingency Keys for HTTP Public Key Pinning =
+
+We create a second set of keys for all our services, so we can pin keys to both
+the one automatically generated on our letsencrypt host and the backup key.
+
+If you do not have a backup-keys directory, get it from git:
+ git clone pauli.torproject.org:/srv/puppet.torproject.org/git/tor-backup-keys.git backup-keys
+
+After adding a new name to ./domains, run ./bin/manage-backup-keys create
+and ./bin/manage-backup-keys verify.  Find the passphrase in
+tor-passwords/000-backup-keys.
+
+-- 
+weasel, Fri, 23 Sep 2016 16:25:13 +0200

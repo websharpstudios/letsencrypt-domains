@@ -1,0 +1,253 @@
+#!/usr/bin/python3
+
+# Copyright (c) 2016 Peter Palfrader <peter@palfrader.org>
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+# Create private RSA keys for all domains listed in domains.  Have these keys
+# encrypted symmetrically, but we compute a digest of each key's public key
+# and keep information for use with HTTP Public Key Pinning around.
+
+import argparse
+import base64
+import getpass
+import hashlib
+import hmac
+import logging
+import os
+import os.path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+class KeyHelpers:
+    @staticmethod
+    def get_pin_from_key(fn, passphrase=None):
+        try:
+            if not passphrase is None:
+                (r_fd,w_fd) = os.pipe()
+
+                # This assumes the passphrase fits into the buffer of our pipes
+                os.write(w_fd, passphrase)
+                os.close(w_fd)
+
+                args = ['openssl', 'rsa', '-passin', 'fd:%d'%(r_fd,), '-in', fn, '-outform', 'der', '-pubout']
+                logging.debug("Running {}.".format(' '.join(args)))
+                pubkey = subprocess.check_output(args, pass_fds=[r_fd])
+                os.close(r_fd)
+            else:
+                args = ['openssl', 'rsa', '-in', fn, '-outform', 'der', '-pubout']
+                logging.debug("Running {}.".format(' '.join(args)))
+                pubkey = subprocess.check_output(args)
+        except subprocess.CalledProcessError:
+            logging.error("openssl rsa failed to output public key from {}.  Wrong passphrase?".format(fn))
+            sys.exit(1)
+
+        digest = hashlib.sha256(pubkey).digest()
+        encoded = base64.b64encode(digest).decode('ascii')
+        pin = 'pin-sha256="' + encoded + '"'
+
+        return pin
+
+class KeyManager:
+    PASSPHRASE_TOKEN = b'Yes, you have the right passphrase.'
+    TOKEN_LENGTH = 4
+
+    def __init__(self, keydir):
+        if not os.path.isdir(keydir):
+            logging.error("Key directory '{}' is not a directory.  Maybe you have to create it?".format(keydir))
+            sys.exit(1)
+
+        self.keydir = keydir
+
+
+    def get_name_key(self, cn):
+        return os.path.join(self.keydir, cn + '.key')
+    def get_name_pin(self, cn):
+        return os.path.join(self.keydir, cn + '.pin')
+    def get_name_passphrase_token(self):
+        return os.path.join(self.keydir, '.pass-token')
+
+    def acquire_passphrase(self):
+        passphrase = getpass.getpass(prompt='Passphrase for RSA keys: ')
+        self.passphrase = passphrase.encode()
+
+        fn = self.get_name_passphrase_token()
+
+        token = hmac.new(self.passphrase, self.PASSPHRASE_TOKEN, hashlib.sha256).hexdigest()[0:self.TOKEN_LENGTH]
+
+        if not os.path.exists(fn):
+            logging.warning("Passphrase check token {} does not exist.  Creating it.".format(fn))
+            with open(fn, "w") as f:
+                print(token, file=f)
+
+        with open(fn, "r") as f:
+            token_from_file = f.read().strip()
+        if not token_from_file == token:
+            logging.warning("Passphrase check token {} mismatch!".format(fn))
+            sys.exit(1)
+
+class KeyCreator(KeyManager):
+
+    @staticmethod
+    def set_umask():
+        os.umask(0o077)
+
+    def create_key(self, tf):
+        (r_fd,w_fd) = os.pipe()
+
+        # This assumes the passphrase fits into the buffer of our pipes
+        os.write(w_fd, self.passphrase)
+        os.close(w_fd)
+
+        subprocess.check_call(
+            ['openssl', 'genrsa', '-aes256', '-passout', 'fd:%d'%(r_fd,), '-out', tf.name, '4096'],
+            preexec_fn=self.set_umask,
+            pass_fds=[r_fd])
+        os.close(r_fd)
+
+    def act(self, cn):
+        keyname = self.get_name_key(cn)
+        if os.path.exists(keyname):
+            logging.info("Key for {} already exists.".format(cn))
+            return True
+
+        logging.info("Creating a key for {}.".format(cn))
+        with tempfile.NamedTemporaryFile() as tf:
+            self.create_key(tf)
+            pin = KeyHelpers.get_pin_from_key(tf.name, passphrase=self.passphrase)
+            with open(self.get_name_pin(cn), "w") as out:
+                print(pin, file=out)
+            shutil.copy(tf.name, keyname)
+
+        return True
+
+
+class KeyVerifier(KeyManager):
+    def act(self, cn):
+        keyname = self.get_name_key(cn)
+        if not os.path.exists(keyname):
+            logging.warning("Key for {} does not exist.".format(cn))
+            return False
+
+        pinfname = self.get_name_pin(cn)
+        if not os.path.exists(pinfname):
+            logging.warning("Digest file for {} does not exist.".format(cn))
+            return False
+
+
+        logging.debug("{}: Getting pin from file.".format(cn))
+        with open(pinfname, "r") as f:
+            pin_from_file = f.read().strip()
+        logging.debug("{}:  It's '{}'.".format(cn, pin_from_file))
+
+        logging.debug("{}: Getting pin from key.".format(cn))
+        pin_from_key = KeyHelpers.get_pin_from_key(keyname, passphrase=self.passphrase)
+        logging.debug("{}:  It's '{}'.".format(cn, pin_from_key))
+
+
+        if not pin_from_file == pin_from_key:
+            logging.warning("Pins for {} differ!".format(cn))
+            return False
+
+        logging.info("Pins for {} ok.".format(cn))
+        return True
+
+
+def get_domains(domains):
+    for line in domains:
+        line = line.strip()
+        if line.startswith('#'):
+            continue
+        elems = line.split(maxsplit=1)
+        if len(elems) == 0:
+            continue
+        yield elems[0]
+
+def setup_logging(args):
+    logargs = {'format': '%(levelname)s:%(message)s'}
+    if args.verbose >= 2:
+        logargs['level'] = logging.DEBUG
+    elif args.verbose >= 1:
+        logargs['level'] = logging.INFO
+    else:
+        logargs['level'] = logging.WARNING
+    logging.basicConfig(**logargs)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command",
+        help="One of 'create', 'verify'.")
+    parser.add_argument("--domains",
+        type=argparse.FileType('r'),
+        default='domains',
+        help="file with list of domains")
+    parser.add_argument("--keydir",
+        default='backup-keys',
+        help="directory for keys")
+    parser.add_argument('--verbose', '-v',
+        action='count',
+        default=0,
+        help="more verbose output (use twice for even more)")
+    args = parser.parse_args()
+
+    setup_logging(args)
+
+    if args.command == 'create':
+        cmd = KeyCreator(args.keydir)
+    elif args.command == 'verify':
+        cmd = KeyVerifier(args.keydir)
+    else:
+        logging.error("Unknown command '{}'.".format(args.command))
+        sys.exit(1)
+
+    cmd.acquire_passphrase()
+
+    ok = True
+    for d in get_domains(args.domains):
+        res = cmd.act(d)
+        if not res: ok = False
+
+    if not ok:
+        sys.exit(1)
+
+def get_pin():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("keyfile",
+        help="File with (unprotected) key")
+    parser.add_argument('--verbose', '-v',
+        action='count',
+        default=0,
+        help="more verbose output (use twice for even more)")
+    args = parser.parse_args()
+
+    setup_logging(args)
+
+    pin = KeyHelpers.get_pin_from_key(args.keyfile)
+    print(pin)
+
+if __name__ == "__main__":
+    cmd_name =  os.path.basename(sys.argv[0])
+    if cmd_name == "get-pin":
+        get_pin()
+    else:
+        main()
