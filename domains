@@ -8,6 +8,7 @@ atlas.torproject.org
 aus1.torproject.org
 aus2.torproject.org
 bridges.torproject.org
+bugs.torproject.org
 check.torproject.org
 cloud.torproject.org
 collector.torproject.org
@@ -40,7 +41,9 @@ tb-manual.torproject.org
 torrouter.torproject.org
 trac.torproject.org
 webstats.torproject.org
+wiki.torproject.org
 www-staging.torproject.org
+
 donate.torproject.org
 staging.donate.torproject.org
 test.donate.torproject.org
