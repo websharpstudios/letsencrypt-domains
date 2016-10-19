@@ -47,6 +47,10 @@ webstats.torproject.org
 wiki.torproject.org
 www-staging.torproject.org
 
+testnet.torproject.org
+collector.testnet.torproject.org
+onionoo.testnet.torproject.org
+
 donate.torproject.org
 staging.donate.torproject.org
 test.donate.torproject.org
