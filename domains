@@ -41,6 +41,7 @@ spec.torproject.org
 stem.torproject.org
 svn.torproject.org
 tb-manual.torproject.org
+test-data.tbb.torproject.org test-data-2.tbb.torproject.org test-data-3.tbb.torproject.org
 trac.torproject.org
 webstats.torproject.org
 wiki.torproject.org
