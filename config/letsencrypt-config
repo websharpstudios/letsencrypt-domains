@@ -15,5 +15,5 @@ HOOK="/srv/letsencrypt.torproject.org/bin/le-hook"
 CONTACT_EMAIL="torproject-admin@torproject.org"
 WELLKNOWN="/srv/letsencrypt.torproject.org/var/acme-challenges"
 LOCKFILE="/srv/letsencrypt.torproject.org/var/lock"
-PRIVATE_KEY="/srv/letsencrypt.torproject.org/var/private_key.pem"
+ACCOUNT_KEY="/srv/letsencrypt.torproject.org/var/private_key.pem"
 
