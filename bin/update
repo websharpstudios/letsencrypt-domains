@@ -9,4 +9,4 @@ BASE=/srv/letsencrypt.torproject.org
 PATH=$BASE/bin:$PATH
 
 (cd "$BASE"/repositories/letsencrypt-domains && git pull --quiet)
-letsencrypt --cron
+dehydrated-wrap --cron

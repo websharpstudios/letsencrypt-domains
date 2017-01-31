@@ -1,0 +1,4 @@
+#!/bin/sh
+
+BASE=/srv/letsencrypt.torproject.org
+dehydrated --config "$BASE/etc/dehydrated-config" "$@"

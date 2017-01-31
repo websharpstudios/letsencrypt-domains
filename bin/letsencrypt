@@ -1,4 +1,0 @@
-#!/bin/sh
-
-BASE=/srv/letsencrypt.torproject.org
-letsencrypt.sh --config "$BASE/etc/letsencrypt-config" "$@"
