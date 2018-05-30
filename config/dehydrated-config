@@ -18,3 +18,4 @@ WELLKNOWN="/srv/letsencrypt.torproject.org/var/acme-challenges"
 LOCKFILE="/srv/letsencrypt.torproject.org/var/lock"
 ACCOUNT_KEY="/srv/letsencrypt.torproject.org/var/private_key.pem"
 
+DOMAINS_D="/srv/letsencrypt.torproject.org/repositories/letsencrypt-domains/per-domain-config"
