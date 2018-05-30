@@ -11,6 +11,7 @@ OPENSSL_CNF="/usr/lib/ssl/openssl.cnf"
 
 CHALLENGETYPE="dns-01"
 HOOK="/srv/letsencrypt.torproject.org/bin/le-hook"
+HOOK_CHAIN="yes"
 
 CONTACT_EMAIL="torproject-admin@torproject.org"
 WELLKNOWN="/srv/letsencrypt.torproject.org/var/acme-challenges"

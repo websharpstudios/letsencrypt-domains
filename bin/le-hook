@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # The hook script (indicated in the config.sh file or the --hook/-k command
 # line argument) gets four arguments: an operation name (clean_challenge,
@@ -40,64 +40,119 @@ getserial() {
 }
 
 post() {
-  name="$1"; shift
-  zone="$(getzone "$name")"
-  pre="$(getserial "$zone" "$MASTER")"
+  local names
+  local zones
+  local preserials
+
+  local name
+  local zone
+  local pre
+  local i
+
+  local count
+  local stage
+  local sleep_time
+  local last_dig_output
+  local serial
+
+  names=("$@")
+  for name in "${names[@]}"; do
+    zone="$(getzone "$name")"
+    pre="$(getserial "$zone" "$MASTER")"
+
+    zones+=("$zone")
+    preserials+=("$pre")
+  done
 
   cat "$BASE/challenges/"* > "$BASE/snippet"
   (cd / && $REBUILDZONES)
 
   count=1
-  stage=1
   sleep_time=1
-  last_dig_output=0
-  while : ; do
-    serial="$(getserial "$zone" "$MASTER")"
-    case $stage in
-      1) # wait for master to get a new serial
-        echo "Waiting for master to update from $pre.  Currently at $serial.."
-        if [ "$serial" != "$pre" ]; then
-          stage=2
-          continue
-        fi
-        ;;
-      2) # wait for all secondaries to get a new serial
-        echo "Waiting for secondaries to update to match master at $serial.."
-        if dig "$zone" +nssearch $NSSEARCHDIGOPT | awk -vs="$serial" '$4 != s {exit 1}'; then
-          break
-        elif [ $(( count - last_dig_output )) -ge 10 ]; then
-          dig "$zone" +nssearch $NSSEARCHDIGOPT | sed -e 's/^/ /'
-          last_dig_output="$count"
-        fi
-    esac
-    if [ "$count" -gt "$WAIT_TIMEOUT" ]; then
-      echo >&2 "Timing out in stage $stage"
-      echo >&2 "Serial is $serial.  Servers are at:"
-      dig "$zone" +nssearch $NSSEARCHDIGOPT >&2
-      echo >&2 "Giving it a try anyway.  Maybe it will work.."
+  for i in "${!names[@]}"; do
+    name="${names[$i]}"
+    zone="${zones[$i]}"
+    pre="${preserials[$i]}"
+
+    if [ -z "$pre" ]; then
+      echo "Unable to learn previous serial for $zone (for $name) from $MASTER.  (Maybe $MASTER is not authoritative for the zone.)"
+      echo "We will sleep 5 seconds and just cross our fingers."
+      sleep 5
+      continue
     fi
-    if   [ "$count" -gt 30 ] ; then sleep_time=5;
-    elif [ "$count" -gt 15 ] ; then sleep_time=3;
-    elif [ "$count" -gt  5 ] ; then sleep_time=2; fi
-    count=$(( count + sleep_time ))
-    sleep $sleep_time;
+
+    stage=1
+    last_dig_output=0
+    while : ; do
+      serial="$(getserial "$zone" "$MASTER")"
+      case $stage in
+        1) # wait for master to get a new serial
+          echo "Waiting for master to update $zone (for $name) from $pre.  Currently at $serial.."
+          if [ "$serial" != "$pre" ]; then
+            stage=2
+            continue
+          fi
+          ;;
+        2) # wait for all secondaries to get a new serial
+          echo "Waiting for secondaries to update to match master at $serial.."
+          if dig "$zone" +nssearch $NSSEARCHDIGOPT | awk -vs="$serial" '$4 != s {exit 1}'; then
+            break
+          elif [ $(( count - last_dig_output )) -ge 10 ]; then
+            dig "$zone" +nssearch $NSSEARCHDIGOPT | sed -e 's/^/ /'
+            last_dig_output="$count"
+          fi
+      esac
+      if [ "$count" -gt "$WAIT_TIMEOUT" ]; then
+        echo >&2 "Timing out in stage $stage"
+        echo >&2 "Serial is $serial.  Servers are at:"
+        dig "$zone" +nssearch $NSSEARCHDIGOPT >&2
+        echo >&2 "Giving it a try anyway.  Maybe it will work.."
+        break
+      fi
+      if   [ "$count" -gt 30 ] ; then sleep_time=5;
+      elif [ "$count" -gt 15 ] ; then sleep_time=3;
+      elif [ "$count" -gt  5 ] ; then sleep_time=2; fi
+      count=$(( count + sleep_time ))
+      sleep $sleep_time;
+    done
   done
 }
 deploy_challenge() {
-  name="$1"; shift
-  chtoken="$1"; shift
-  token="$1"; shift
+  local name
+  local chtoken
+  local token
+  local str
+  local labelnames
 
   mkdir -p "$BASE/challenges"
-  echo "_acme-challenge.$name. 60 IN TXT \"$token\"" > "$BASE/challenges/$name"
-  post "_acme-challenge.$name"
+
+  labelnames=()
+
+  while [ "$#" -gt 0 ]; do
+    name="$1"; shift
+    chtoken="$1"; shift
+    token="$1"; shift
+
+    str="_acme-challenge.$name. 60 IN TXT \"$token\""
+
+    echo "Adding challenge '${str}' for $name."
+    echo "${str}" >> "$BASE/challenges/$name"
+    labelnames+=("_acme-challenge.$name")
+  done
+  post "${labelnames[@]}"
 }
 clean_challenge() {
-  name="$1"; shift
-  rm -f "$BASE/challenges/$name"
+  local name
+  while [ "$#" -gt 0 ]; do
+    name="$1"; shift
+    rm -f "$BASE/challenges/$name"
+  done
+  : > "$BASE/snippet"
 }
 deploy_cert() {
+  local name
   name="$1"; shift
+  echo "Calling deploy for $name"
   deploy "$name"
 }
 
@@ -114,10 +169,10 @@ case "$op" in
   deploy_cert)
     deploy_cert "$@"
     ;;
-  unchanged_cert)
+  unchanged_cert|exit_hook|request_failure|invalid_challenge|startup_hook)
     ;;
   *)
-    echo >&2 "Unknown op: $op"
-    exit 1
+    #echo >&2 "Warning: $0: Ignoring unknown hook op $op (this is not an error)"
+    : silently ignore unknown hooks
     ;;
 esac

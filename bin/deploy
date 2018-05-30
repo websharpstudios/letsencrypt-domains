@@ -14,6 +14,8 @@ umask 022
 BASE="/srv/letsencrypt.torproject.org"
 RES="/srv/letsencrypt.torproject.org/var/result"
 
+echo "$0 called with $*"
+
 deploy_cert() {
   name="$1"; shift
 
