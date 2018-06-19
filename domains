@@ -49,6 +49,7 @@ spec.torproject.org
 stem.torproject.org
 storm.torproject.org *.storm.torproject.org
 styleguide.torproject.org
+support.torproject.org
 support-staging.torproject.org
 survey.torproject.org
 svn.torproject.org
