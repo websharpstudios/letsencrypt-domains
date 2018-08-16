@@ -12,12 +12,14 @@ set -u
 
 umask 022
 
-BASE="/srv/letsencrypt.torproject.org/var/hook"
-RES="/srv/letsencrypt.torproject.org/var/result"
-MASTER="nevii.torproject.org"
-REBUILDZONES="sudo -u dnsadm -H /srv/dns.torproject.org/bin/update"
+BASE="/srv/letsencrypt.debian.org/var/hook"
+RES="/srv/letsencrypt.debian.org/var/result"
+MASTER="denis.debian.org"
+REBUILDZONES="sudo -u dnsadm -H /srv/dns.debian.org/bin/update --no-keys-update"
 WAIT_TIMEOUT=600
-NSSEARCHDIGOPT="-4"
+NSSEARCHDIGOPT=""
+
+[ -e /etc/dsa/le-hook.conf ] && . /etc/dsa/le-hook.conf
 
 getzone() {
   name="$1"; shift
@@ -84,18 +86,22 @@ post() {
     stage=1
     last_dig_output=0
     while : ; do
-      serial="$(getserial "$zone" "$MASTER")"
       case $stage in
         1) # wait for master to get a new serial
+          serial="$(getserial "$zone" "$MASTER")"
           echo "Waiting for master to update $zone (for $name) from $pre.  Currently at $serial.."
           if [ "$serial" != "$pre" ]; then
+            # We're assuming this new version includes our snippet.  There's a
+            # bit of a race here if the zone updated for some other reason.
             stage=2
             continue
           fi
           ;;
         2) # wait for all secondaries to get a new serial
           echo "Waiting for secondaries to update to match master at $serial.."
-          if dig "$zone" +nssearch $NSSEARCHDIGOPT | awk -vs="$serial" '$4 != s {exit 1}'; then
+          # we are evil and ignore serial wrapping
+          if dig "$zone" +nssearch $NSSEARCHDIGOPT | awk -vs="$serial" '$4 < s {exit 1}'; then
+            # all secondaries have at least $serial, stop waiting
             break
           elif [ $(( count - last_dig_output )) -ge 10 ]; then
             dig "$zone" +nssearch $NSSEARCHDIGOPT | sed -e 's/^/ /'
