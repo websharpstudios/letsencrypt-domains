@@ -26,6 +26,7 @@ extra.torproject.org
 gettor.torproject.org
 git.torproject.org
 gitweb.torproject.org
+grafana1.torproject.org grafana.torproject.org
 help.torproject.org
 jenkins.torproject.org
 lektor-staging.torproject.org
