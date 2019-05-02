@@ -1,0 +1,5 @@
+When removing a domain, also make sure to remove the corresponding files from
+  nevii:/srv/letsencrypt.torproject.org/var/result
+
+-- 
+weasel, Thu, 02 May 2019 19:31:44 +0200
