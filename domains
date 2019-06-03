@@ -18,6 +18,7 @@ cloud.torproject.org
 collector.torproject.org
 collector2.torproject.org
 consensus-health.torproject.org
+community.torproject.org
 db.torproject.org
 deb.torproject.org
 dist.torproject.org
