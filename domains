@@ -28,6 +28,7 @@ gettor.torproject.org
 git.torproject.org
 gitweb.torproject.org
 grafana1.torproject.org grafana.torproject.org
+grafana2.torproject.org
 help.torproject.org
 jenkins.torproject.org
 lektor-staging.torproject.org
@@ -45,6 +46,7 @@ onionperf.torproject.org
 ooni.torproject.org
 people.torproject.org
 prometheus1.torproject.org prometheus.torproject.org
+prometheus2.torproject.org
 rbm.torproject.org
 research.torproject.org
 research-staging.torproject.org
