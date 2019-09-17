@@ -1,3 +1,7 @@
+See also this page for our LE documentation:
+
+https://help.torproject.org/tsa/howto/letsencrypt/
+
 = Contingency Keys for HTTP Public Key Pinning =
 
 We create a second set of keys for all our services, so we can pin keys to both
