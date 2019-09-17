@@ -71,11 +71,6 @@ wiki.torproject.org
 2019.www.torproject.org
 www-staging.torproject.org
 
-testnet.torproject.org
-atlas.testnet.torproject.org
-collector.testnet.torproject.org
-health.testnet.torproject.org
-
 donate.torproject.org
 staging.donate.torproject.org
 test.donate.torproject.org
