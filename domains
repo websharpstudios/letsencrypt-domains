@@ -31,6 +31,7 @@ gitweb.torproject.org
 grafana1.torproject.org grafana.torproject.org
 grafana2.torproject.org
 help.torproject.org
+ircbouncer.torproject.org
 jenkins.torproject.org
 lektor-staging.torproject.org
 lists.torproject.org
