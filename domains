@@ -60,7 +60,6 @@ snowflake.torproject.org
 spec.torproject.org
 src-ref.docs.torproject.org
 stem.torproject.org
-storm.torproject.org *.storm.torproject.org
 styleguide.torproject.org
 support.torproject.org
 support-staging.torproject.org
