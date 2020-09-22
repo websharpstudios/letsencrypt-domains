@@ -39,6 +39,7 @@ lektor-staging.torproject.org
 lists.torproject.org
 media.torproject.org
 metrics.torproject.org
+metrics-store.torproject.org
 munin.torproject.org
 nagios.torproject.org
 nc.torproject.org
