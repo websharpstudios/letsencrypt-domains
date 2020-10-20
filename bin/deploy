@@ -30,7 +30,6 @@ deploy_cert() {
   install -m 0644 "$cert" "$RES/$name.crt"
   install -m 0644 "$chain" "$RES/$name.crt-chain"
   install -m 0644 "$chained" "$RES/$name.crt-chained"
-  get-pin "$key" > "$RES/$name.pin"
 
   size=$(openssl rsa  < "$key" -text -noout | awk -F: '$1 == "Private-Key" {print $2}' | sed -e 's/[^0-9]//g')
   e="$BASE/var/extra/dh-$size.pem"
