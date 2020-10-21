@@ -77,8 +77,8 @@ trac.torproject.org
 wiki.torproject.org
 2019.www.torproject.org
 www-staging.torproject.org
-
 donate.torproject.org
+donate-api.torproject.org
 staging.donate.torproject.org
 staging.donate-api.torproject.org
 test.donate.torproject.org
