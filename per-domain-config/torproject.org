@@ -1,1 +1,0 @@
-RENEW_DAYS="80"
