@@ -25,7 +25,15 @@ deploy_cert() {
   chain="$b/chain.pem"
   chained="$b/fullchain.pem"
 
-  if openssl x509 -text < "$chain" | grep "Let's Encrypt Authority X3"; then
+  case "$name" in
+    blog.torproject.org|check.torproject.org|dist.torproject.org|torproject.org|www.torproject.org)
+      pinned=1
+      ;;
+    *)
+      pinned=0
+  esac
+
+  if [ "$pinned" = 0 ] || openssl x509 -text < "$chain" | grep "Let's Encrypt Authority X3"; then
     mkdir -p "$RES"
     install -m 0600 "$key" "$RES/$name.key"
     install -m 0644 "$cert" "$RES/$name.crt"
