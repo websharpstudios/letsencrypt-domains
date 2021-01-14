@@ -25,32 +25,18 @@ deploy_cert() {
   chain="$b/chain.pem"
   chained="$b/fullchain.pem"
 
-  case "$name" in
-    blog.torproject.org|check.torproject.org|dist.torproject.org|torproject.org|www.torproject.org)
-      pinned=1
-      ;;
-    *)
-      pinned=0
-  esac
+  mkdir -p "$RES"
+  install -m 0600 "$key" "$RES/$name.key"
+  install -m 0644 "$cert" "$RES/$name.crt"
+  install -m 0644 "$chain" "$RES/$name.crt-chain"
+  install -m 0644 "$chained" "$RES/$name.crt-chained"
 
-  if [ "$pinned" = 0 ] || openssl x509 -text < "$chain" | grep "Let's Encrypt Authority X3"; then
-    mkdir -p "$RES"
-    install -m 0600 "$key" "$RES/$name.key"
-    install -m 0644 "$cert" "$RES/$name.crt"
-    install -m 0644 "$chain" "$RES/$name.crt-chain"
-    install -m 0644 "$chained" "$RES/$name.crt-chained"
-
-    size=$(openssl rsa  < "$key" -text -noout | awk -F: '$1 ~ /Private-Key/ {print $2}' | sed -e 's/ bit.*//; s/[^0-9]//g')
-    e="$BASE/var/extra/dh-$size.pem"
-    if [ -e "$e" ]; then
-      cat "$e" >> "$RES/$name.crt-chained"
-    else
-      echo >&2 "Warning: No $e file found."
-    fi
+  size=$(openssl rsa  < "$key" -text -noout | awk -F: '$1 ~ /Private-Key/ {print $2}' | sed -e 's/ bit.*//; s/[^0-9]//g')
+  e="$BASE/var/extra/dh-$size.pem"
+  if [ -e "$e" ]; then
+    cat "$e" >> "$RES/$name.crt-chained"
   else
-    echo 2>&2 "Invalid chain! cf.  tpo/tpa/team#40052"
-    touch /home/letsencrypt/non-X3-cert-encountered
-    exit 1
+    echo >&2 "Warning: No $e file found."
   fi
 }
 
