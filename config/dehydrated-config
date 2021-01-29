@@ -22,3 +22,5 @@ DOMAINS_D="/srv/letsencrypt.torproject.org/repositories/letsencrypt-domains/per-
 
 
 PREFERRED_CHAIN="DST Root CA X3"
+
+KEY_ALGO=rsa
