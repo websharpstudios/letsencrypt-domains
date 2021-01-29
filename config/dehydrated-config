@@ -5,7 +5,10 @@
 #LICENSE="https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf"
 
 RENEW_DAYS="30"
+
 KEYSIZE="4096"
+KEY_ALGO=rsa
+
 PRIVATE_KEY_RENEW="no"
 OPENSSL_CNF="/usr/lib/ssl/openssl.cnf"
 
@@ -22,5 +25,3 @@ DOMAINS_D="/srv/letsencrypt.torproject.org/repositories/letsencrypt-domains/per-
 
 
 PREFERRED_CHAIN="DST Root CA X3"
-
-KEY_ALGO=rsa
