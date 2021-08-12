@@ -25,7 +25,7 @@ getzone() {
   name="$1"; shift
 
   # find zone cut
-  while [ "$(dig -t SOA "$name" +noall +answer | awk '$4=="SOA" {print}')" = "" ] && [ "$name" != "" ] ; do
+  while [ "$(dig -t SOA "$name" +noall +answer | awk '$4=="CNAME" {exit} $4=="SOA" {print}')" = "" ] && [ "$name" != "" ] ; do
     name=${name#*.}
   done
   echo "$name"
