@@ -61,7 +61,6 @@ prometheus2.torproject.org
 rbm.torproject.org
 research.torproject.org
 research-staging.torproject.org
-review.torproject.org
 rpm.torproject.org
 rt.torproject.org
 safetyboard.torproject.org
@@ -103,3 +102,4 @@ www.onion-router.net
 www.torproject.com torproject.com   www.torproject.net torproject.net
 
 pages.torproject.net *.pages.torproject.net
+review.torproject.net
