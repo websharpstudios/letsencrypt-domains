@@ -12,6 +12,7 @@ aus2.torproject.org
 blog.torproject.org
 blog-staging.torproject.org
 bridges.torproject.org
+bridges-test.torproject.org
 bugs.torproject.org
 cdn.torproject.org
 cdn-fastly-backend.torproject.org
