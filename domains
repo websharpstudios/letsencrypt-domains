@@ -10,7 +10,6 @@ atlas.torproject.org
 aus1.torproject.org
 aus2.torproject.org
 blog.torproject.org
-blog-staging.torproject.org
 bridges.torproject.org
 bridges-test.torproject.org
 bugs.torproject.org
@@ -59,7 +58,6 @@ prometheus1.torproject.org prometheus.torproject.org
 prometheus2.torproject.org
 rbm.torproject.org
 research.torproject.org
-research-staging.torproject.org
 rpm.torproject.org
 rt.torproject.org
 safetyboard.torproject.org
@@ -71,7 +69,6 @@ stem.torproject.org
 styleguide.torproject.org
 submit-01.torproject.org submission.torproject.org
 support.torproject.org
-support-staging.torproject.org
 survey.torproject.org
 svn.torproject.org
 svn-archive.torproject.org
@@ -81,7 +78,6 @@ test-data.tbb.torproject.org test-data-2.tbb.torproject.org test-data-3.tbb.torp
 trac.torproject.org
 wiki.torproject.org
 2019.www.torproject.org
-www-staging.torproject.org
 donate.torproject.org
 api.donate.torproject.org
 staging-api.donate.torproject.org
