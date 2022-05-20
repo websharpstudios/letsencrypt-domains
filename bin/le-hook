@@ -20,6 +20,7 @@ WAIT_TIMEOUT=600
 NSSEARCHDIGOPT=""
 
 [ -e /etc/dsa/le-hook.conf ] && . /etc/dsa/le-hook.conf
+[ -e "/etc/dsa/le-hook-$(id -n -u).conf" ] && . "/etc/dsa/le-hook-$(id -n -u).conf"
 
 getzone() {
   name="$1"; shift
