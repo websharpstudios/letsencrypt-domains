@@ -57,6 +57,7 @@ probetelemetry-01.torproject.org probetelemetry.torproject.org
 prometheus1.torproject.org prometheus.torproject.org
 prometheus2.torproject.org
 rbm.torproject.org
+relay-01.torproject.org
 research.torproject.org
 rpm.torproject.org
 rt.torproject.org
