@@ -75,6 +75,8 @@ svn.torproject.org
 svn-archive.torproject.org
 nightlies.tbb.torproject.org
 tb-build-03.torproject.org
+tb-build-04.torproject.org
+tb-build-05.torproject.org
 tb-manual.torproject.org
 test-data.tbb.torproject.org test-data-2.tbb.torproject.org test-data-3.tbb.torproject.org
 trac.torproject.org
