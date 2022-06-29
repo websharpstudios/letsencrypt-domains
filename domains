@@ -32,6 +32,7 @@ gettor.torproject.org
 git.torproject.org
 gitlab.torproject.org
 gitlab-dev.torproject.org
+gitlab-dev-pages.torproject.net *.pages.torproject.net
 gitweb.torproject.org
 grafana1.torproject.org grafana.torproject.org
 grafana2.torproject.org
