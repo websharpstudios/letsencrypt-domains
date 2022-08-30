@@ -63,6 +63,7 @@ relay-01.torproject.org
 research.torproject.org
 rpm.torproject.org
 rdsys-backend.torproject.org
+rdsys-frontend-01.torproject.org rdsys-frontend.torproject.org rdsys-gettor.torproject.org
 rt.torproject.org
 safetyboard.torproject.org
 snowflake.torproject.org
